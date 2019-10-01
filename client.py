@@ -114,7 +114,7 @@ if __name__ == "__main__":
     'put': putFile,
     'rename': renameFile,
     'list': listFiles,
-    'exit': exit }.get()() #needs to have user inputs from the command line
+    'exit': exit }.get(actions())() #needs to have user inputs from the command line
 
     if command not in options: 
         message = "Not in options but I will give to server to handle."
