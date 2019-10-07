@@ -25,3 +25,5 @@ put [file_name]
 rename [old_file_name] [new_file_name]
 list
 exit
+
+At the moment, the fastest way to close the server is to run exit command via client.py.
