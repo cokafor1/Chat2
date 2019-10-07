@@ -26,4 +26,6 @@ rename [old_file_name] [new_file_name]
 list
 exit
 
-At the moment, the fastest way to close the server is to run exit command via client.py.
+At the moment, the fastest way to close the server is to run exit command via client.py. Also, returns to the main function in the server program
+have been omitted as that is where the server socket is bound and rebinding without collecting the necessary arguments causes errors......that is
+how I understand it.....
