@@ -101,10 +101,13 @@ def renameFile(old_file_name, new_file_name): #rename the files using two argume
 def listFiles(): 
     message = "list"
     clientSocket.sendto(message.encode(), server)
-    time.sleep(1)
-    (serverReply, somewhere) = clientSocket.recvfrom(2048)
-    print(serverReply.decode(), '\n', sep = '')
-    main()
+    while True:
+        try:
+            time.sleep(.1)
+            (serverReply, rightthere) = clientSocket.recvfrom(2048)
+            print(serverReply.decode())
+        except BlockingIOError:
+            main()
     
 
 def exit(): #simply send 'exit' string to server and allow it to handle
