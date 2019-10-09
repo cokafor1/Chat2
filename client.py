@@ -5,6 +5,7 @@ import argparse
 import os
 import time
 import imghdr
+import base64
 
 #Creating UDP socket-
 clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #Internet is address family, UDP protocol
@@ -22,23 +23,35 @@ def getFile(file_name): #ask for file, if file doesn't exist, print message and 
             clientSocket.sendto(message.encode(), server) #send get command to server
             clientReceiveFile = open(file_name, 'wb')
         
-            (incoming_file_size, rightthere) = clientSocket.recvfrom(2048) #why use new address?
+            (incoming_file_size, rightthere) = clientSocket.recvfrom(4096) #why use new address?
             file_size = int(incoming_file_size.decode()) #get incoming file size and serve as acknowledgment
             print("Receiving file of size %s bytes." % file_size)
+            time.sleep(1)
 
             count = 0
             totalpackets = (int(file_size) / 2048) #number of packets to sent = size of the file / buffer size (size of packets)
-            while count < totalpackets: #write to file
-                (serverReply, rightthere) = clientSocket.recvfrom(2048)
-                count += 1
-                clientReceiveFile.write(serverReply)
+            if 'jpg' in file_name:
+                while count < totalpackets: #write to file
+                    (serverReply, rightthere) = clientSocket.recvfrom(2048)
+                    time.sleep(.5)
+                    count += 1
+                    print(count)
+                    clientReceiveFile.write(base64.b64decode(serverReply.decode()))
+                    type(clientReceiveFile.write(base64.b64decode(serverReply.decode())))
+            else:
+                while count < totalpackets: #write to file
+                    (serverReply, rightthere) = clientSocket.recvfrom(1024)
+                    count += 1
+                    print(count)
+                    clientReceiveFile.write(serverReply)
+            print(1)
             clientReceiveFile.close()
+            main()
 
-        if os.path.getsize(clientReceiveFile.read()) != file_size: getFile(file_name)
-        else: main()
+        #if os.path.getsize(clientReceiveFile.read()) != file_size: getFile(file_name)
+        #else: main()
     except socket.error:
             print ("Took too long or something....")
-            main()
     
         
 
@@ -64,14 +77,14 @@ def putFile(file_name): #send the file to server
             clientSocket.sendto(new_fileHandle, server)
             main()
         else:
-            new_fileHandle = fileHandle.read(2048)
+            new_fileHandle = fileHandle.read(1024)
             count = 0
-            totalpackets = (int(file_size) / 2048) #number of packets to sent = size of the file / buffer size (size of packets)
+            totalpackets = (int(file_size) / 1024) #number of packets to sent = size of the file / buffer size (size of packets)
             while count < totalpackets: 
                 clientSocket.sendto(new_fileHandle, server)
                 count += 1
-                print("%d packets sent (%d bytes)." % (count, (count * 2048)))
-            new_fileHandle = fileHandle.read(2048)
+                print("%d packets sent (%d bytes)." % (count, (count * 1024)))
+            new_fileHandle = fileHandle.read(1024)
             fileHandle.close()
             main()
     else: 
@@ -104,7 +117,7 @@ def listFiles():
     while True:
         try:
             time.sleep(.1)
-            (serverReply, rightthere) = clientSocket.recvfrom(2048)
+            (serverReply, rightthere) = clientSocket.recvfrom(1024)
             print(serverReply.decode())
         except BlockingIOError:
             main()
@@ -176,7 +189,7 @@ def main():
     elif len(choice) == 3:
         old_file_name = choice[1]
         new_file_name = choice[2]
-        options.get(command)(old_file_name, new_file_name )
+        options.get(command)(old_file_name, new_file_name)
     else: options.get(command)()
 
     #clientSocket.close()

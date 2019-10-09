@@ -5,6 +5,8 @@ import argparse
 import getopt
 import os
 import time
+import imghdr
+import base64
 
 #Client address and port information-
 Address = '127.0.0.1'
@@ -19,21 +21,26 @@ def getFile(file_name): #receive command, decode, check if file exists, open enc
         try:
             serverSocket.sendto(file_size.encode(), anywhere)
         except socket.error:
-                print("I couldn't send the file size.")
+            print("I couldn't send the file size.")
 
-        if os.path.getsize(file_name) < 2000:
-            new_fileHandle = fileHandle.read()
-            serverSocket.sendto(new_fileHandle, anywhere)
-            print(new_fileHandle)
-        else:
-            new_fileHandle = fileHandle.read(2048)
+        if imghdr.what(file_name) == 'jpeg':
+            new_fileHandle = base64.b64encode(fileHandle.read(1024))
             count = 0
-            totalpackets = (int(file_size) / 2048) #number of packets to sent = size of the file / buffer size (size of packets)
+            totalpackets = (int(file_size) / 1024) #number of packets to sent = size of the file / buffer size (size of packets)
+            while count < totalpackets: 
+                time.sleep(.5)
+                serverSocket.sendto(new_fileHandle, anywhere)
+                count += 1
+                print("%d packets sent (%d bytes)." % (count, (count * 1024)))
+            fileHandle.close()
+        else:
+            new_fileHandle = fileHandle.read(1024)
+            count = 0
+            totalpackets = (int(file_size) / 1024) 
             while count < totalpackets: 
                 serverSocket.sendto(new_fileHandle, anywhere)
                 count += 1
-                print("%d packets sent (%d bytes)." % (count, (count * 2048)))
-            new_fileHandle = fileHandle.read(2048)
+                print("%d packets sent (%d bytes)." % (count, (count * 1024)))
             fileHandle.close()
     else: 
         print('File does not exist in directory.')
@@ -65,15 +72,15 @@ def putFile(file_name): #receive command, decode, check if file exists, open enc
             print("Receiving file of size %s bytes." % file_size)
 
             count = 0
-            totalpackets = (int(file_size) / 2048) #number of packets to sent = size of the file / buffer size (size of packets)
+            totalpackets = (int(file_size) / 1024) #number of packets to sent = size of the file / buffer size (size of packets)
             while count < totalpackets: #write to file
-                (clientReply, backthere) = serverSocket.recvfrom(2048)
+                (clientReply, backthere) = serverSocket.recvfrom(1024)
                 count += 1
                 serverReceiveFile.write(clientReply)
             serverReceiveFile.close()
             
-        if os.path.getsize(serverReceiveFile.read()) != file_size: getFile(file_name)
-        else: main()
+        #if os.path.getsize(serverReceiveFile.read()) != file_size: getFile(file_name)
+        #else: main()
     except socket.error:
         print ("Took too long or something....")
         #main()
@@ -113,7 +120,6 @@ def listFiles():
     for x in listing:
         #time.sleep(1)
         serverSocket.sendto(x.encode(), anywhere)
-        print(x)
 
 #def exit:
 def exit():
@@ -144,7 +150,7 @@ def main():
         print("Ready!")
 
         global anywhere
-        (message, anywhere) = serverSocket.recvfrom(2048)
+        (message, anywhere) = serverSocket.recvfrom(1024)
 
         parse_msg = message.decode().split()
         command = parse_msg[0]
