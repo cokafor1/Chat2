@@ -1,11 +1,4 @@
-import socket
-import ipaddress
-import sys
-import argparse
-import os
-import time
-import imghdr
-import base64
+import socket, ipaddress, sys, argparse, os, time, imghdr, base64
 
 #Creating UDP socket-
 clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #Internet is address family, UDP protocol
@@ -134,12 +127,13 @@ def exit(): #simply send 'exit' string to server and allow it to handle
 
 def action(): #how to retrieve arguments......there should be a better way.
     
-    print("Your options are the following-")
-    print("get [file_name]")
-    print("put [file_name]")
-    print("rename [old_file_name] [new_file_name]")
-    print("list")
-    print("exit")
+    print("""\
+    Your options are-
+    get [file_name]
+    put [file_name]
+    rename [old_file_name] [new_file_name]
+    list
+    exit""")
 
     action = input('What would you like to do?').split()
 

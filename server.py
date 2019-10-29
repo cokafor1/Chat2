@@ -1,12 +1,4 @@
-import socket
-import ipaddress
-import sys
-import argparse
-import getopt
-import os
-import time
-import imghdr
-import base64
+import socket, ipaddress, sys, argparse, os, time, imghdr, base64
 
 #Client address and port information-
 Address = '127.0.0.1'
